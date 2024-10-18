@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Rule Engine</h1>
+
+        <!-- Form to create rule -->
+        <div class="section">
+            <h2>Create Rule</h2>
+            <form id="createRuleForm">
+                <label for="rule_name">Rule Name:</label>
+                <input type="text" id="rule_name" required>
+
+                <label for="rule_string">Rule String:</label>
+                <textarea id="rule_string" required></textarea>
+
+                <button type="submit">Create Rule</button>
+            </form>
+            <p id="createRuleResult"></p>
+        </div>
+
+        <!-- Form to evaluate rule -->
+        <div class="section">
+            <h2>Evaluate Rule</h2>
+            <form id="evaluateRuleForm">
+                <label for="eval_rule_name">Rule Name:</label>
+                <input type="text" id="eval_rule_name" required>
+
+                <label for="age">Age:</label>
+                <input type="number" id="age" required>
+
+                <label for="department">Department:</label>
+                <input type="text" id="department" required>
+
+                <label for="salary">Salary:</label>
+                <input type="number" id="salary" required>
+
+                <label for="experience">Experience:</label>
+                <input type="number" id="experience" required>
+
+                <button type="submit">Evaluate Rule</button>
+            </form>
+            <p id="evaluateRuleResult"></p>
+        </div>
+    </div>
+
+    <script>
+        // Handle create rule form submission
+        document.getElementById('createRuleForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const ruleName = document.getElementById('rule_name').value;
+            const ruleString = document.getElementById('rule_string').value;
+
+            fetch('/create_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    rule_name: ruleName,
+                    rule_string: ruleString
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('createRuleResult').innerText = data.message;
+            })
+            .catch(error => {
+                document.getElementById('createRuleResult').innerText = "Error creating rule.";
+            });
+        });
+
+        // Handle evaluate rule form submission
+        document.getElementById('evaluateRuleForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const ruleName = document.getElementById('eval_rule_name').value;
+            const age = document.getElementById('age').value;
+            const department = document.getElementById('department').value;
+            const salary = document.getElementById('salary').value;
+            const experience = document.getElementById('experience').value;
+
+            fetch(`/evaluate_rule/${ruleName}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    age: parseInt(age),
+                    department: department,
+                    salary: parseInt(salary),
+                    experience: parseInt(experience)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result) {
+                    document.getElementById('evaluateRuleResult').innerText = "Evaluation Result: True (User is eligible)";
+                } else {
+                    document.getElementById('evaluateRuleResult').innerText = "Evaluation Result: False (User is not eligible)";
+                }
+            })
+            .catch(error => {
+                document.getElementById('evaluateRuleResult').innerText = "Error evaluating rule.";
+            });
+        });
+    </script>
+</body>
+</html>
